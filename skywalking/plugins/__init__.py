@@ -59,7 +59,10 @@ def install():
         if sys.version_info < (3, 12):
             plugin = importer.find_module(modname).load_module(modname)
         else:
-            plugin = importlib.util.module_from_spec(importer.find_spec(modname))
+            spec = importlib.util.find_spec(f"skywalking.plugins.{modname}")
+            if spec and spec.loader:
+                plugin = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(plugin)
 
         # todo: refactor the version checker, currently it doesn't really work as intended
         supported = pkg_version_check(plugin)
